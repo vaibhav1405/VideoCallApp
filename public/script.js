@@ -1,4 +1,3 @@
-// const { text } = require("express");
 
 const socket = io('/');
 const videoGrid =  document.querySelector('#video-grid');
@@ -27,7 +26,11 @@ navigator.mediaDevices.getUserMedia({
                     })
         socket.on('user-connected',(userId)=>{
             // console.log("from script" , userId);
-            connecToNewUser(userId,stream)
+            setTimeout(function ()
+        {
+          connecToNewUser(userId, stream);
+        },5000
+      )
 
         })
         let msg = $('input');
@@ -50,6 +53,9 @@ socket.on("createMessage",message=>{
     scrollToBottom();
 })
     })
+socket.on('user-disconnected', userId => {
+  if (peers[userId]) peers[userId].close()
+})
 peer.on('open',id=>{
     socket.emit('join-room',ROOM_ID,id)
 })
@@ -64,6 +70,10 @@ const connecToNewUser = (userId,stream)=>{
         call.on('stream',userVideoStream =>{
             addVideoStream(video,userVideoStream);
         })
+    call.on('close', () => {
+   		 video.remove()
+ 		 })
+        peers[userId] = call;
 }
 
 
